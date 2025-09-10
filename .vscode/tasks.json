@@ -1,0 +1,14 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "args": ["python3", "migrate_activation_rules.py"],
+      "command": "python3",
+      "group": "build",
+      "isBackground": false,
+      "label": "Migrate Activation Rules",
+      "problemMatcher": [],
+      "type": "shell"
+    }
+  ]
+}

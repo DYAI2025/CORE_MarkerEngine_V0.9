@@ -48,9 +48,7 @@ def resolve_and_validate():
         print("\n--- Missing composed_of references (FATAL) ---")
         for error in missing_composed_of:
             print(f"Marker '{error['marker_id']}' in file '{error['file']}' has a missing composed_of reference: '{error['missing_ref']}'")
-    else:
-        print("\n--- composed_of references are all valid. ---")
-
+        raise SystemExit("Preflight failed: Missing composed_of references. Fix before proceeding.")
 
     # Validate detector registry
     missing_fires_marker = []
@@ -70,6 +68,7 @@ def resolve_and_validate():
         print("\n--- Missing fires_marker references in detector registry (FATAL) ---")
         for error in missing_fires_marker:
             print(f"Detector '{error['detector_id']}' has a missing fires_marker reference: '{error['missing_ref']}'")
+        raise SystemExit("Preflight failed: Missing fires_marker references. Fix before proceeding.")
     else:
         print("\n--- fires_marker references in detector registry are all valid. ---")
 
