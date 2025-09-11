@@ -6,8 +6,8 @@ frame:
   pragmatics: "H\xF6fliche Ablehnung"
   narrative: polite_decline
 composed_of:
-- ATO_VOLL_STRESS
-- ATO_MUSS_SCHAUEN
+- ATO_FULL_STRESS
+- ATO_DELAY_REASON
 activation:
   rule: ANY
   params:

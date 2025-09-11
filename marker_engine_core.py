@@ -118,7 +118,12 @@ class MarkerEngine:
             elif det.get("module") == "custom":
                 plugin = self.plugins[det["id"]]
                 result = plugin.run(text)
-                hits.extend(result)
+                if isinstance(result, dict) and "fires" in result:
+                    hits.extend({"marker": m, "source": det["id"]} for m in result.get("fires", []))
+                elif isinstance(result, list):
+                    hits.extend(result)
+                else:
+                    hits.append(result)
 
         # 2) Pattern-basierte Marker (nur Level 1, atomic)
         for marker_id, marker in self.markers.items():
@@ -189,161 +194,162 @@ class MarkerEngine:
         # Activation Engine with evidence cascade
         activated_markers = []
         for marker_id, marker in self.markers.items():
-            if "activation" in marker:
-                activation = marker["activation"]
-                rule = activation.get("rule")
-                params = activation.get("params", {})
-                composed_of = marker.get("composed_of", [])
-                
-                if rule == "ANY":
-                    count = 0
-                    triggering_hits = []
-                    for hit in all_hits:
-                        if hit["marker"] in composed_of:
-                            count += 1
-                            triggering_hits.append(hit)
-                    if count >= params.get("count", 1):
-                        activated_markers.append({
-                            "marker_id": marker_id,
-                            "source": "activation",
-                            "evidence": triggering_hits,
-                            "rule": rule,
-                            "params": params
-                        })
-                elif rule == "ALL":
-                    present = all(any(hit["marker"] == c for hit in all_hits) for c in composed_of)
-                    if present:
-                        triggering_hits = [hit for hit in all_hits if hit["marker"] in composed_of]
-                        activated_markers.append({
-                            "marker_id": marker_id,
-                            "source": "activation",
-                            "evidence": triggering_hits,
-                            "rule": rule,
-                            "params": params
-                        })
-                elif rule == "AT_LEAST":
-                    count = 0
-                    triggering_hits = []
-                    for hit in all_hits:
-                        if hit["marker"] in composed_of:
-                            count += 1
-                            triggering_hits.append(hit)
-                    if count >= params.get("count", 1):
-                        activated_markers.append({
-                            "marker_id": marker_id,
-                            "source": "activation",
-                            "evidence": triggering_hits,
-                            "rule": rule,
-                            "params": params
-                        })
-                elif rule == "WEIGHTED_AND":
-                    # Implement weighted AND logic
-                    total_weight = 0.0
-                    triggering_hits = []
-                    for component in composed_of:
-                        component_hits = [hit for hit in all_hits if hit["marker"] == component]
-                        if component_hits:
-                            # Get weight from combination or default to 1.0
-                            weight = 1.0
-                            if "combination" in marker and "components" in marker["combination"]:
-                                for comp in marker["combination"]["components"]:
-                                    if isinstance(comp, dict) and comp.get("marker_id") == component:
-                                        weight = comp.get("weight", 1.0)
-                                        break
-                            total_weight += weight
-                            triggering_hits.extend(component_hits)
-                    
-                    threshold = params.get("threshold", 0.5)
-                    if total_weight >= threshold:
-                        activated_markers.append({
-                            "marker_id": marker_id,
-                            "source": "activation",
-                            "evidence": triggering_hits,
-                            "rule": rule,
-                            "params": params
-                        })
-                elif rule == "X_OF_Y":
-                    # Implement X of Y logic
-                    x = params.get("x", 1)
-                    y = params.get("y", len(composed_of))
-                    present_count = 0
-                    triggering_hits = []
-                    
-                    for component in composed_of:
-                        component_hits = [hit for hit in all_hits if hit["marker"] == component]
-                        if component_hits:
-                            present_count += 1
-                            triggering_hits.extend(component_hits)
-                    
-                    if present_count >= x:
-                        activated_markers.append({
-                            "marker_id": marker_id,
-                            "source": "activation",
-                            "evidence": triggering_hits,
-                            "rule": rule,
-                            "params": params
-                        })
-                elif rule == "SUM_WEIGHT":
-                    # Implement sum weight logic
-                    total_weight = 0.0
-                    triggering_hits = []
-                    
-                    for component in composed_of:
-                        component_hits = [hit for hit in all_hits if hit["marker"] == component]
-                        if component_hits:
-                            # Get weight from combination or default to 1.0
-                            weight = 1.0
-                            if "combination" in marker and "components" in marker["combination"]:
-                                for comp in marker["combination"]["components"]:
-                                    if isinstance(comp, dict) and comp.get("marker_id") == component:
-                                        weight = comp.get("weight", 1.0)
-                                        break
-                            total_weight += weight * len(component_hits)
-                            triggering_hits.extend(component_hits)
-                    
-                    threshold = params.get("threshold", 1.0)
-                    if total_weight >= threshold:
-                        activated_markers.append({
-                            "marker_id": marker_id,
-                            "source": "activation",
-                            "evidence": triggering_hits,
-                            "rule": rule,
-                            "params": params
-                        })
-                elif rule == "AT_LEAST_DISTINCT":
-                    # Implement distinct component logic
-                    distinct_components = set()
-                    triggering_hits = []
-                    
-                    for hit in all_hits:
-                        if hit["marker"] in composed_of:
-                            distinct_components.add(hit["marker"])
-                            triggering_hits.append(hit)
-                    
-                    if len(distinct_components) >= params.get("count", 1):
-                        activated_markers.append({
-                            "marker_id": marker_id,
-                            "source": "activation",
-                            "evidence": triggering_hits,
-                            "rule": rule,
-                            "params": params
-                        })
-                elif rule == "FREQUENCY":
-                    # Implement frequency logic
-                    count = params.get("count", 1)
-                    window_size = params.get("window", 5)  # Default window of 5 messages
-                    
-                    # Count occurrences in recent messages (simplified)
-                    recent_hits = [hit for hit in all_hits if hit["marker"] in composed_of]
-                    
-                    if len(recent_hits) >= count:
-                        activated_markers.append({
-                            "marker_id": marker_id,
-                            "source": "activation",
-                            "evidence": recent_hits,
-                            "rule": rule,
-                            "params": params
-                        })
+            activation = marker.get("activation")
+            if not activation:
+                continue
+            rule = activation.get("rule")
+            params = activation.get("params", {})
+            composed_of = marker.get("composed_of", [])
+
+            if rule == "ANY":
+                count = 0
+                triggering_hits = []
+                for hit in all_hits:
+                    if hit["marker"] in composed_of:
+                        count += 1
+                        triggering_hits.append(hit)
+                if count >= params.get("count", 1):
+                    activated_markers.append({
+                        "marker_id": marker_id,
+                        "source": "activation",
+                        "evidence": triggering_hits,
+                        "rule": rule,
+                        "params": params
+                    })
+            elif rule == "ALL":
+                present = all(any(hit["marker"] == c for hit in all_hits) for c in composed_of)
+                if present:
+                    triggering_hits = [hit for hit in all_hits if hit["marker"] in composed_of]
+                    activated_markers.append({
+                        "marker_id": marker_id,
+                        "source": "activation",
+                        "evidence": triggering_hits,
+                        "rule": rule,
+                        "params": params
+                    })
+            elif rule == "AT_LEAST":
+                count = 0
+                triggering_hits = []
+                for hit in all_hits:
+                    if hit["marker"] in composed_of:
+                        count += 1
+                        triggering_hits.append(hit)
+                if count >= params.get("count", 1):
+                    activated_markers.append({
+                        "marker_id": marker_id,
+                        "source": "activation",
+                        "evidence": triggering_hits,
+                        "rule": rule,
+                        "params": params
+                    })
+            elif rule == "WEIGHTED_AND":
+                # Implement weighted AND logic
+                total_weight = 0.0
+                triggering_hits = []
+                for component in composed_of:
+                    component_hits = [hit for hit in all_hits if hit["marker"] == component]
+                    if component_hits:
+                        # Get weight from combination or default to 1.0
+                        weight = 1.0
+                        if "combination" in marker and "components" in marker["combination"]:
+                            for comp in marker["combination"]["components"]:
+                                if isinstance(comp, dict) and comp.get("marker_id") == component:
+                                    weight = comp.get("weight", 1.0)
+                                    break
+                        total_weight += weight
+                        triggering_hits.extend(component_hits)
+
+                threshold = params.get("threshold", 0.5)
+                if total_weight >= threshold:
+                    activated_markers.append({
+                        "marker_id": marker_id,
+                        "source": "activation",
+                        "evidence": triggering_hits,
+                        "rule": rule,
+                        "params": params
+                    })
+            elif rule == "X_OF_Y":
+                # Implement X of Y logic
+                x = params.get("x", 1)
+                y = params.get("y", len(composed_of))
+                present_count = 0
+                triggering_hits = []
+
+                for component in composed_of:
+                    component_hits = [hit for hit in all_hits if hit["marker"] == component]
+                    if component_hits:
+                        present_count += 1
+                        triggering_hits.extend(component_hits)
+
+                if present_count >= x:
+                    activated_markers.append({
+                        "marker_id": marker_id,
+                        "source": "activation",
+                        "evidence": triggering_hits,
+                        "rule": rule,
+                        "params": params
+                    })
+            elif rule == "SUM_WEIGHT":
+                # Implement sum weight logic
+                total_weight = 0.0
+                triggering_hits = []
+
+                for component in composed_of:
+                    component_hits = [hit for hit in all_hits if hit["marker"] == component]
+                    if component_hits:
+                        # Get weight from combination or default to 1.0
+                        weight = 1.0
+                        if "combination" in marker and "components" in marker["combination"]:
+                            for comp in marker["combination"]["components"]:
+                                if isinstance(comp, dict) and comp.get("marker_id") == component:
+                                    weight = comp.get("weight", 1.0)
+                                    break
+                        total_weight += weight * len(component_hits)
+                        triggering_hits.extend(component_hits)
+
+                threshold = params.get("threshold", 1.0)
+                if total_weight >= threshold:
+                    activated_markers.append({
+                        "marker_id": marker_id,
+                        "source": "activation",
+                        "evidence": triggering_hits,
+                        "rule": rule,
+                        "params": params
+                    })
+            elif rule == "AT_LEAST_DISTINCT":
+                # Implement distinct component logic
+                distinct_components = set()
+                triggering_hits = []
+
+                for hit in all_hits:
+                    if hit["marker"] in composed_of:
+                        distinct_components.add(hit["marker"])
+                        triggering_hits.append(hit)
+
+                if len(distinct_components) >= params.get("count", 1):
+                    activated_markers.append({
+                        "marker_id": marker_id,
+                        "source": "activation",
+                        "evidence": triggering_hits,
+                        "rule": rule,
+                        "params": params
+                    })
+            elif rule == "FREQUENCY":
+                # Implement frequency logic
+                count = params.get("count", 1)
+                window_size = params.get("window", 5)  # Default window of 5 messages
+
+                # Count occurrences in recent messages (simplified)
+                recent_hits = [hit for hit in all_hits if hit["marker"] in composed_of]
+
+                if len(recent_hits) >= count:
+                    activated_markers.append({
+                        "marker_id": marker_id,
+                        "source": "activation",
+                        "evidence": recent_hits,
+                        "rule": rule,
+                        "params": params
+                    })
 
         # Add activated markers to hits
         for activated in activated_markers:
