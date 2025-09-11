@@ -8,9 +8,7 @@ frame:
   pragmatics: Nähe-Suche bei gleichzeitiger Alarmierung
   narrative: Sehnsucht und Sorge
 composed_of:
-- type: semantic
-  marker_ids:
-  - ANXIOUS_CHILDHOOD_REFERENCE
+ - SEM_ANXIOUS_CHILDHOOD_REFERENCE
 activation:
   rule: COUNT(ANXIOUS_CHILDHOOD_REFERENCE) >= 2 IN 20
   window:
