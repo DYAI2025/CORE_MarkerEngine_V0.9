@@ -1,0 +1,62 @@
+# ATO (Atomare) Marker Template
+# Grundlegende Sprachelemente und Signale
+id: ATO_EXAMPLE_MARKER
+version: '3.4'
+lang: de
+description: "Kurze Beschreibung des atomaren Markers"
+
+frame:
+  signal: 
+    - "Hauptsignal"
+    - "Alternatives Signal"
+  concept: "Zentrales Konzept des Markers"
+  pragmatics: "Pragmatische Funktion in der Kommunikation"
+  narrative: "Narrative Rolle (z.B. contrast, escalation, bonding)"
+
+# Pattern für Regex-basierte Erkennung
+pattern:
+  - "(?i)\\b(beispiel|muster)\\b"
+  - "weitere.*patterns"
+
+# Aktivierungsregeln
+activation:
+  rule: ANY  # Optionen: ANY, ALL, COUNT
+  params:
+    count: 1
+    window:
+      size: 20
+      unit: messages  # oder: seconds
+
+# Zeitfenster für Analyse
+window:
+  messages: 20
+  seconds: 300
+
+# Scoring-Parameter
+scoring:
+  base: 1.0        # Basis-Score
+  weight: 0.5      # Gewichtung
+  decay: 0.01      # Abklingfaktor
+  formula: logistic  # Optionen: logistic, linear, step
+
+# Beispiele (mindestens 5 erforderlich)
+examples:
+  - "Beispiel 1: Direkte Äußerung mit dem Marker"
+  - "Beispiel 2: Variante in anderem Kontext"
+  - "Beispiel 3: Mit zusätzlichen Elementen"
+  - "Beispiel 4: Negationsform oder Verneinung"
+  - "Beispiel 5: In emotionalem Kontext"
+  - "Beispiel 6: Formelle Variante"
+
+# Tags für Kategorisierung
+tags:
+  - ato
+  - grundlegendes_element
+  - sprachsignal
+
+# Optionale Metadaten
+metadata:
+  created_by: "template"
+  created_date: "2024-09-11"
+  last_modified: "2024-09-11"
+  validation_status: "template"

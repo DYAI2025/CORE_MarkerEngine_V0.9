@@ -1,0 +1,89 @@
+# MEMA (Meta-Marker) Template
+# Übergeordnete Analysemuster und Meta-Level-Erkennungen
+id: MEMA_EXAMPLE_MARKER
+version: '3.4'
+lang: de
+description: "Beschreibung des Meta-Markers oder übergeordneten Analysemusters"
+
+frame:
+  signal:
+    - "Meta-Level Signal"
+    - "Übergeordnetes Muster"
+  concept: "Meta-Konzept oder systemisches Verständnis"
+  pragmatics: "Übergeordnete kommunikative oder systemische Funktion"
+  narrative: "Meta-Rolle (z.B. system_dysfunction, relationship_pattern, therapeutic_resistance)"
+
+# Meta-Marker basieren meist auf komplexen Kompositionen
+composed_of:
+  - marker_ids: ["CLU_RELATED_CLUSTER_1", "CLU_RELATED_CLUSTER_2"]
+    weight: 0.5
+  - marker_ids: ["SEM_META_COMPONENT_1", "SEM_META_COMPONENT_2", "CLU_SUPPORTING_CLUSTER"]
+    weight: 0.3
+  - marker_ids: ["ATO_CRITICAL_MARKER"]
+    weight: 0.2
+
+# Seltener direkte Pattern, meist kompositionsbasiert
+# pattern:
+#   - "(?i)(meta.*pattern)"
+
+# Meta-Marker verwenden oft spezielle Detektoren
+detect_class: "MetaPatternDetector"
+
+activation:
+  rule: COUNT
+  params:
+    count: 2  # Mindestanzahl der Komponent-Marker
+    window:
+      size: 100  # Sehr großes Fenster für Meta-Analyse
+      unit: messages
+
+window:
+  messages: 100
+  seconds: 1800
+
+scoring:
+  base: 3.0        # Sehr hohe Basis-Scores für Meta-Marker
+  weight: 0.8
+  decay: 0.05
+  formula: logistic
+
+examples:
+  - "Beispiel 1: Vollständiges Meta-Muster über mehrere Interaktionen"
+  - "Beispiel 2: Meta-Muster in der Entwicklung"
+  - "Beispiel 3: Systemische Störung erkennbar"
+  - "Beispiel 4: Meta-Level Veränderung oder Intervention"
+  - "Beispiel 5: Chronifiziertes Meta-Muster"
+  - "Beispiel 6: Meta-Muster mit therapeutischen Implikationen"
+
+tags:
+  - mema
+  - meta_marker
+  - systemisch
+  - übergeordnet
+  - diagnose
+
+# Meta-Marker spezifische Eigenschaften
+meta_properties:
+  analysis_level: "systemic"       # individual, relational, systemic
+  temporal_scope: "long_term"      # immediate, short_term, long_term
+  diagnostic_weight: "high"        # low, medium, high, critical
+  intervention_priority: "high"    # low, medium, high, urgent
+  
+# Systemische Aspekte
+system_analysis:
+  pattern_category: "dysfunction"   # function, dysfunction, transition, adaptation
+  stability: "persistent"          # transient, recurring, persistent, chronic
+  intervention_complexity: "complex" # simple, moderate, complex, systemic
+  
+# Therapeutische/Interventions-Hinweise
+intervention_guidance:
+  immediate_actions: []            # Liste von empfohlenen sofortigen Maßnahmen
+  monitoring_requirements: []     # Was überwacht werden sollte
+  contraindications: []           # Was vermieden werden sollte
+
+metadata:
+  created_by: "template"
+  created_date: "2024-09-11"
+  last_modified: "2024-09-11"
+  validation_status: "template"
+  clinical_review_required: true

@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.org/schemas/marker/master-core/3.4",
+  "title": "Marker Master Core Schema – Lean-Deep 3.4",
+  "description": "Master configuration for schema loading, priorities and fusion modes",
+  "version": "3.4",
+  "active_schemata": [
+    "https://example.org/schemas/marker/v3.2",
+    "https://example.org/schemas/fraud-markers",
+    "https://example.org/schemas/relation-analyse"
+  ],
+  "priority": {
+    "https://example.org/schemas/marker/v3.2": 1.0,
+    "https://example.org/schemas/fraud-markers": 0.8,
+    "https://example.org/schemas/relation-analyse": 0.6
+  },
+  "fusion": "multiply",
+  "validation": {
+    "strict_mode": false,
+    "required_fields": ["id", "lang", "description", "frame", "examples"],
+    "allow_unknown_prefixes": false
+  },
+  "marker_prefixes": {
+    "ATO_": {
+      "description": "Atomare Marker - grundlegende Sprachelemente",
+      "priority": 1,
+      "validation_schema": "https://example.org/schemas/marker/v3.2"
+    },
+    "SEM_": {
+      "description": "Semantische Marker - Bedeutungsebenen",
+      "priority": 2,
+      "validation_schema": "https://example.org/schemas/marker/v3.2"
+    },
+    "CLU_": {
+      "description": "Cluster Marker - Mustergruppen",
+      "priority": 3,
+      "validation_schema": "https://example.org/schemas/marker/v3.2"
+    },
+    "MEMA_": {
+      "description": "Meta-Marker - übergeordnete Analysemuster",
+      "priority": 4,
+      "validation_schema": "https://example.org/schemas/marker/v3.2"
+    }
+  },
+  "detection_config": {
+    "window_defaults": {
+      "messages": 20,
+      "seconds": 300
+    },
+    "scoring_defaults": {
+      "base": 1.0,
+      "weight": 0.5,
+      "decay": 0.01,
+      "formula": "logistic"
+    }
+  }
+}

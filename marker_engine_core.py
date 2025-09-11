@@ -24,7 +24,7 @@ PRFX_LEVELS = ("ATO_", "SEM_", "CLU_", "MEMA_")
 class MarkerEngine:
     def __init__(self,
                  marker_root: str = "_Marker_5.0",
-                 schema_root: str = "schemata",
+                 schema_root: str = "SCH_",
                  detect_registry: str = "DETECT_/DETECT_registry.json",
                  plugin_root: str = "plugins"):
 
@@ -62,16 +62,44 @@ class MarkerEngine:
 
     def _load_schemata(self):
         """Lädt alle Schemata + Master-Schema für Fusion/Prioritäten."""
+        if not self.schema_path.exists():
+            print(f"Warning: Schema path {self.schema_path} does not exist")
+            return
+            
+        # Load individual schema files
         for file in self.schema_path.glob("SCH_*.json"):
-            data = json.loads(file.read_text("utf-8"))
-            schema_id = data.get("$id") or data.get("id")
-            if schema_id: self.schemas[schema_id] = data
+            try:
+                data = json.loads(file.read_text("utf-8"))
+                schema_id = data.get("$id") or data.get("id")
+                if schema_id: 
+                    self.schemas[schema_id] = data
+                    print(f"Loaded schema: {schema_id} from {file.name}")
+                else:
+                    print(f"Warning: Schema file {file.name} has no ID field")
+            except (json.JSONDecodeError, FileNotFoundError) as e:
+                print(f"Error loading schema {file}: {e}")
+                continue
+        
+        # Load master schema configuration        
         master_path = self.schema_path / "MASTER_SCH_CORE.json"
         if master_path.exists():
-            master = json.loads(master_path.read_text("utf-8"))
-            self.active_schemas = [self.schemas[sch] for sch in master["active_schemata"]]
-            self.schema_priority = master.get("priority", {})
-            self.fusion_mode = master.get("fusion", "multiply")
+            try:
+                master = json.loads(master_path.read_text("utf-8"))
+                # Only load schemas that actually exist
+                self.active_schemas = []
+                for sch_id in master.get("active_schemata", []):
+                    if sch_id in self.schemas:
+                        self.active_schemas.append(self.schemas[sch_id])
+                    else:
+                        print(f"Warning: Master schema references missing schema: {sch_id}")
+                        
+                self.schema_priority = master.get("priority", {})
+                self.fusion_mode = master.get("fusion", "multiply")
+                print(f"Master schema loaded: {len(self.active_schemas)} active schemas")
+            except (json.JSONDecodeError, FileNotFoundError) as e:
+                print(f"Error loading master schema: {e}")
+        else:
+            print(f"Warning: Master schema not found at {master_path}")
 
     def _load_detectors(self):
         """Lädt alle Detektoren aus Registry, inkl. optionaler Plugins."""
@@ -155,7 +183,7 @@ class MarkerEngine:
                 raw = base * weight
 
             for sch in self.active_schemas:
-                prio = self.schema_priority.get(Path(sch["id"]).name + ".json", 1.0)
+                prio = self.schema_priority.get(sch.get("$id", sch.get("id", "unknown")), 1.0)
                 if self.fusion_mode == "multiply":
                     raw *= prio
                 elif self.fusion_mode == "sum":

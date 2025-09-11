@@ -1,0 +1,76 @@
+# CLU (Cluster) Marker Template
+# Mustergruppen und zusammenhängende Verhaltenscluster
+id: CLU_EXAMPLE_MARKER
+version: '3.4'
+lang: de
+description: "Beschreibung des Verhaltens-Clusters oder Mustergruppe"
+
+frame:
+  signal:
+    - "Cluster-Hauptsignal"
+    - "Muster-Indikator"
+  concept: "Übergeordnetes Verhaltensmuster oder Dynamik"
+  pragmatics: "Systematische Funktion im Interaktionsmuster"
+  narrative: "Cluster-Rolle (z.B. escalation_pattern, bonding_cycle, manipulation_spiral)"
+
+# Cluster-Marker werden meist aus anderen Markern komponiert
+composed_of:
+  - marker_ids: ["SEM_RELATED_MARKER_1", "ATO_COMPONENT_1", "ATO_COMPONENT_2"]
+    weight: 0.6
+  - marker_ids: ["SEM_ALTERNATIVE_PATTERN", "ATO_TRIGGER_MARKER"]
+    weight: 0.4
+
+# Optionale direkte Pattern für spezifische Cluster-Signale
+pattern:
+  - "(?i)(cluster.*pattern)"
+
+activation:
+  rule: ALL  # Cluster brauchen meist mehrere gleichzeitige Marker
+  params:
+    count: 3
+    window:
+      size: 50  # Größeres Fenster für Cluster-Analyse
+      unit: messages
+
+window:
+  messages: 50
+  seconds: 900
+
+scoring:
+  base: 2.0        # Cluster haben höhere Basis-Scores
+  weight: 0.7
+  decay: 0.03
+  formula: logistic
+
+examples:
+  - "Beispiel 1: Vollständiges Cluster mit allen Komponenten"
+  - "Beispiel 2: Cluster in Entstehung, erste Signale"
+  - "Beispiel 3: Eskalierendes Cluster-Verhalten"
+  - "Beispiel 4: Cluster-Auflösung oder -Unterbrechung"
+  - "Beispiel 5: Wiederkehrendes Cluster-Muster"
+  - "Beispiel 6: Cluster in verschiedenen Kontexten"
+
+tags:
+  - clu
+  - verhaltenscluster
+  - mustergruppe
+  - systemisch
+
+# Cluster-spezifische Eigenschaften
+cluster_properties:
+  temporal_pattern: "recurring"    # single, recurring, progressive
+  interaction_type: "dyadic"       # individual, dyadic, group
+  stability: "medium"              # low, medium, high
+  intervention_difficulty: "high"  # low, medium, high
+  
+# Abhängigkeiten zu anderen Clustern
+cluster_dependencies:
+  prerequisites: []                # Cluster die vorher auftreten müssen
+  inhibitors: []                  # Cluster die dieses verhindern
+  synergies: []                   # Cluster die sich verstärken
+
+metadata:
+  created_by: "template"
+  created_date: "2024-09-11"
+  last_modified: "2024-09-11"
+  validation_status: "template"

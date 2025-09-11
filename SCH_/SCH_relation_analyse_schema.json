@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://example.org/schemas/analysis/relation/v3.4",
+  "$id": "https://example.org/schemas/relation-analyse",
   "title": "Relation Analyse Output – Lean-Deep 3.4",
   "type": "object",
   "required": ["schema_version","analysis_type","meta","input_data","marker_detection","drift_analysis","relationship_inference","outputs"],
