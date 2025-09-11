@@ -1,0 +1,71 @@
+# SEM (Semantische) Marker Template
+# Bedeutungsebenen und semantische Muster
+id: SEM_EXAMPLE_MARKER
+version: '3.4'
+lang: de
+description: "Beschreibung des semantischen Musters oder der Bedeutungsebene"
+
+frame:
+  signal:
+    - "Semantisches Hauptsignal"
+    - "Bedeutungsvariation"
+  concept: "Semantisches Konzept oder Bedeutungscluster"
+  pragmatics: "Kommunikative Funktion auf Bedeutungsebene"
+  narrative: "Semantische Rolle (z.B. manipulation, validation, deflection)"
+
+# Für semantische Marker können komplexere Patterns verwendet werden
+pattern:
+  - "(?i)(semantic_pattern_1)"
+  - "(?i)(bedeutungs.*muster)"
+
+# Semantische Marker können aus anderen Markern zusammengesetzt sein
+composed_of:
+  - marker_ids: ["ATO_RELATED_MARKER_1", "ATO_RELATED_MARKER_2"]
+    weight: 0.7
+  - marker_ids: ["ATO_ALTERNATIVE_MARKER"]
+    weight: 0.3
+
+activation:
+  rule: COUNT
+  params:
+    count: 2  # Semantische Marker brauchen oft mehrere Signale
+    window:
+      size: 30
+      unit: messages
+
+window:
+  messages: 30
+  seconds: 600
+
+scoring:
+  base: 1.5        # Semantische Marker haben oft höhere Basis-Scores
+  weight: 0.6
+  decay: 0.02
+  formula: logistic
+
+examples:
+  - "Beispiel 1: Semantischer Kontext mit impliziter Bedeutung"
+  - "Beispiel 2: Mehrschichtige Bedeutung erkennbar"
+  - "Beispiel 3: Zusammenspiel mehrerer semantischer Elemente"
+  - "Beispiel 4: Kontextabhängige Bedeutungsverschiebung"
+  - "Beispiel 5: Subtile semantische Manipulation"
+  - "Beispiel 6: Bedeutung durch Auslassung"
+
+tags:
+  - sem
+  - bedeutungsebene
+  - semantik
+  - interpretation
+
+# Erweiterte Metadaten für semantische Marker
+semantic_properties:
+  abstraction_level: "medium"  # low, medium, high
+  context_dependency: "high"   # low, medium, high
+  interpretive_complexity: "medium"
+  cultural_specificity: "german"
+
+metadata:
+  created_by: "template"
+  created_date: "2024-09-11"
+  last_modified: "2024-09-11"
+  validation_status: "template"
